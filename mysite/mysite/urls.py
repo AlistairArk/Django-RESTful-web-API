@@ -17,10 +17,15 @@ from django.contrib import admin
 from django.urls import path
 
 # from rate import views
-from rate.views import HandleRegisterRequest, HandleListRequest
+from rate import views
 
 urlpatterns = [
     path ('admin/', admin.site.urls),
-    path ('api/register/', HandleRegisterRequest),
-	path ('api/list/', HandleListRequest),
+    path ("api/register", views.register),
+    path ("api/login",    views.login),
+    path ("api/logout",   views.logout),
+    path ("api/list",     views.listAll),
+    path ("api/view",     views.view),
+    path ("api/average",  views.average),
+    path ("api/rate",     views.rate)
 ]
