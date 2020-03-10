@@ -1,5 +1,7 @@
 from django.db import models
 from django import forms
+from django.contrib import messages
+from django.core.exceptions import ValidationError
 
 
 class Student(models.Model):
@@ -58,13 +60,30 @@ class ModuleInstance(models.Model):
     '''
     # instance_id  = models.AutoField(primary_key=True)
     yearList = []
-    for i in range(20):
-        yearList.append((2009+i,2009+i))
+    for i in range(2000,3000,1):
+        yearList.append((i,i))
     
     professor = models.ManyToManyField(Professor)
     module    = models.ForeignKey(Module, on_delete=models.CASCADE)
     year      = models.IntegerField(choices=yearList)
     semester  = models.IntegerField(choices=[(1, "Semester 1"), (2, "Semester 2")])
+
+
+    def clean(self, *args, **kwargs): # Validation to prevent duplicate module instances
+
+        query = []
+        try:
+            # Check if identical module instance already exists (Shares same module/year/semester)
+            query = ModuleInstance.objects.filter(module__exact=self.module).filter(year__exact=self.year).filter(semester__exact=self.semester)
+        except Exception as e:
+            pass # Exception raised if user hasn't selected a module
+
+        if len(query): # Raise error
+            errorMessage = "This module instance already exists. "
+            errorMessage+= "Please specify a different year, module or semester to continue."
+            raise ValidationError(errorMessage)
+
+        super(ModuleInstance, self).clean(*args, **kwargs)
 
     def __str__(self):
         toReturn = str(self.module) + ", " + str(self.year) + ", Semester " + str(self.semester)
@@ -86,3 +105,10 @@ class Rating(models.Model):
 
 
 
+# from django.db.models.signals import pre_save, post_save
+
+# @ModuleInstance(pre_save)
+# def pre_save_handler(sender, instance, *args, **kwargs):
+#     # some case
+#     if case_error:
+#         raise Exception('OMG')

@@ -29,7 +29,7 @@ def register(request): # POST
             return "The username you have entered is taken"
 
         if not len(username) or len(username)>=30: # check username length
-            return "Usernames must be between 1 and 30 characters in length."
+            return "Username must be between 1 and 30 characters in length."
 
         return ""
 
