@@ -2,20 +2,22 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
 from django.http import HttpResponse
 from .models import Student, Professor, Module, ModuleInstance, Rating
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import user_passes_test
+
 import re
 
-@csrf_exempt
-def HandleRegisterRequest (request):
-    return HttpResponse ('not yet implemented')
+
+
+def loginRequired(func):
+    # Check if user is logged in via session variables
+    if request.session.get('loggedIn', None) == True:
+        return 1
+    return 0
+
 
 @csrf_exempt
-def HandleListRequest (request):
-    return HttpResponse ('not yet implemented')
-
-
-
-@csrf_exempt
-def register(request): # POST
+def apiRegister(request): # POST
     ''' register
     This is used to allow a user to register to the service using a username, email and a password. When
     the command is invoked, the program prompts the user to enter the username, email, and password
@@ -79,7 +81,7 @@ def register(request): # POST
 
 
 @csrf_exempt
-def login(request):
+def apiLogin(request):
     ''' login
     This command is used to log in to the service. The syntax for this command is:
 
@@ -92,21 +94,36 @@ def login(request):
     Invoking this command will prompt the user to enter a username and password which are then sent
     to the service for authentication.
     '''
+    # username = request.POST['username']
+    # password = request.POST['password']
 
-
-    return HttpResponse('not yet implemented')
+    # user = authenticate(username=username, password=password)
+        # login(request, user)
+    # if user is not None:
+        # request.session["username"] = username # Set a session value:
+    if len(Student.objects.filter(username__exact=username).filter(password__exact=password)):
+        return HttpResponse("Welcome!")
+        request.session['loggedIn'] = True
+        request.session['username'] = username
+    else:
+        return HttpResponse("The username or password could not be found.")
 
 @csrf_exempt
-def logout(request):
+@user_passes_test(loginRequired, login_url='redirect/')
+def apiLogout(request):
     '''
     logout
     This causes the user to logout from the current session. The syntax for this command is:
      logout
     '''
-    return HttpResponse('not yet implemented')
+    for key in request.session.keys():
+        del request.session[key]
+
+    return HttpResponse("Logout successful.")
 
 @csrf_exempt
-def listAll(request):
+@user_passes_test(loginRequired, login_url='redirect/')
+def apiList(request):
     '''
     list
     This is used to view a list of all module instances and the professor(s) teaching each of them (Option
@@ -116,7 +133,8 @@ def listAll(request):
     return HttpResponse('not yet implemented')
 
 @csrf_exempt
-def view(request):
+@user_passes_test(loginRequired, login_url='redirect/')
+def apiView(request):
     '''
     view
     This command is used to view the rating of all professors (Option 2 above). The syntax for this
@@ -126,7 +144,8 @@ def view(request):
     return HttpResponse('not yet implemented')
 
 @csrf_exempt
-def average(request):
+@user_passes_test(loginRequired, login_url='redirect/')
+def apiAverage(request):
     '''
     average
     This command is used to view the average rating of a certain professor in a certain module (Option 3
@@ -138,8 +157,13 @@ def average(request):
     '''
     return HttpResponse('not yet implemented')
 
+
+
+
+
 @csrf_exempt
-def rate(request):
+@user_passes_test(loginRequired, login_url='redirect/')
+def apiRate(request):
     '''
     rate
     This is used to rate the teaching of a certain professor in a certain module instance (Option 4 above).
@@ -152,3 +176,7 @@ def rate(request):
     rating        is a numerical value between 1-5.
     '''
     return HttpResponse('not yet implemented')
+
+@csrf_exempt
+def apiRedirect(request):
+    return HttpResponse("You must be logged in to perform that action.")

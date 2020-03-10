@@ -21,11 +21,12 @@ from rate import views
 
 urlpatterns = [
     path ('admin/', admin.site.urls),
-    path ("api/register", views.register),
-    path ("api/login",    views.login),
-    path ("api/logout",   views.logout),
-    path ("api/list",     views.listAll),
-    path ("api/view",     views.view),
-    path ("api/average",  views.average),
-    path ("api/rate",     views.rate)
+    path ('api/redirect/',  views.apiRedirect),
+    path ("api/register",   views.apiRegister),
+    path ("api/login",      views.apiLogin),
+    path ("api/logout",     views.apiLogout),
+    path ("api/list",       views.apiList),
+    path ("api/view",       views.apiView),
+    path ("api/average",    views.apiAverage),
+    path ("api/rate",       views.apiRate)
 ]

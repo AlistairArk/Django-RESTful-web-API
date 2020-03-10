@@ -2,7 +2,7 @@ from django.db import models
 from django import forms
 from django.contrib import messages
 from django.core.exceptions import ValidationError
-
+from django.contrib.auth.models import User
 
 class Student(models.Model):
     '''
@@ -16,8 +16,14 @@ class Student(models.Model):
     password = models.CharField(max_length=30)
     email = models.EmailField(max_length=50)
 
+
+    # def save(self, *args, **kwargs): # Generate Unique ID based on forename and surname
+    #     user = User.objects.create_user(self.username, self.email, self.password)
+    #     super(Student, self).save(*args, **kwargs)
+
     def __str__(self):
         return str(self.username + ", " + self.email)
+
 
 
 class Professor(models.Model):
