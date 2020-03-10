@@ -14,6 +14,9 @@ class Student(models.Model):
     password = models.CharField(max_length=30)
     email = models.EmailField(max_length=50)
 
+    def __str__(self):
+        return str(self.username + ", " + self.email)
+
 
 class Professor(models.Model):
     '''
@@ -37,7 +40,7 @@ class Professor(models.Model):
         super(Professor, self).save(*args, **kwargs)
 
     def __str__(self):
-        return str(self.professorID + ", " + self.forename[0] + ". " + self.surname)
+        return str(self.professorID + ", Professor " + self.forename[0] + ". " + self.surname)
 
 class Module(models.Model):
     # module_id    = models.AutoField(primary_key=True)
@@ -60,18 +63,26 @@ class ModuleInstance(models.Model):
     
     professor = models.ManyToManyField(Professor)
     module    = models.ForeignKey(Module, on_delete=models.CASCADE)
-
-    # professor = models.CharField(max_length=30)
     year      = models.IntegerField(choices=yearList)
     semester  = models.IntegerField(choices=[(1, "Semester 1"), (2, "Semester 2")])
 
+    def __str__(self):
+        toReturn = str(self.module) + ", " + str(self.year) + ", Semester " + str(self.semester)
+        toReturn+= ", " + ", ".join([str(p.professorID) for p in self.professor.all()])
+        return toReturn
   
 
 class Rating(models.Model):
+    ratingChoice = []
+    for i in range(1,6,1):
+        ratingChoice.append(((i, str(i)+" Stars")))
+
     instance = models.ForeignKey(ModuleInstance, on_delete=models.CASCADE)
     student  = models.ForeignKey(Student, on_delete=models.CASCADE)
-    rating   = models.FloatField()
+    rating   = models.FloatField(choices=ratingChoice)
 
+    def __str__(self):
+        return str(self.instance.module) + ", " + str(self.student.username) + ", " + str(int(self.rating)) + " stars" 
 
 
 # class ModuleChoiceField(forms.ModelChoiceField):

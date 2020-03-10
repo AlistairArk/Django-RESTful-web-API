@@ -21,8 +21,20 @@ def register(request):
 
 	register
 	'''
+	
+	# username
+	# password
+	# email
+	# p1 = Professor.objects.create( forename = '',	surname = '',
+	# 	password = '',
+	# 	email = '',
+	# 	admin = '',
+	# 	accountType = '',
+	# 	averageRating = '')
 
-	# p1 = User.objects.create(username = '',
+	# p1.save()
+
+	# p1 = Professor.objects.create(username = '',
 	# 	forename = '',
 	# 	surname = '',
 	# 	password = '',
