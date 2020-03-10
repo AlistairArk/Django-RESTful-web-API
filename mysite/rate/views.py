@@ -2,7 +2,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
 from django.http import HttpResponse
 from .models import Student, Professor, Module, ModuleInstance, Rating
-
+import re
 
 @csrf_exempt
 def HandleRegisterRequest (request):
@@ -13,32 +13,6 @@ def HandleListRequest (request):
     return HttpResponse ('not yet implemented')
 
 
-def invalidUsername(username): # Ensure the username entered meets username standards
-
-    if Student.objects.filter(username__exact=username): # check if username is taken
-        return "The username you have entered has is taken"
-
-    if not len(username) or len(username)>=30: # check username length
-        return "Usernames must be between 1 and 30 characters in length."
-
-    return 0
-
-
-def invalidPassword(password): # Ensure the password the user entered meets password standards
-
-    if (len(password)<6 or len(password)>=30): # check password length   
-        return "Passwords must be between 6 and 30 characters in length."
-
-    return 0
-
-def invalidEmail(email):
-    # Ensure the email entered is valid
-
-    emailSplit = email.replace("@","~~@~~").split("~~")
-    if not (len(emailSplit)==3 and emailSplit[1]=="@"):
-        return "Invalid email."
-
-    return 0
 
 @csrf_exempt
 def register(request): # POST
@@ -49,18 +23,44 @@ def register(request): # POST
 
     register
     '''
+    def invalidUsername(username): # Ensure the username entered meets username standards
+
+        if Student.objects.filter(username__exact=username): # check if username is taken
+            return "The username you have entered is taken"
+
+        if not len(username) or len(username)>=30: # check username length
+            return "Usernames must be between 1 and 30 characters in length."
+
+        return ""
+
+
+    def invalidPassword(password): # Ensure the password the user entered meets password standards
+
+        if (len(password)<6 or len(password)>=30): # check password length   
+            return "Passwords must be between 6 and 30 characters in length."
+
+        return ""
+
+    def invalidEmail(email):
+        # Ensure the email entered is valid
+
+        regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
+        if not re.search(regex,email):
+            return "Invalid email."
+
+        return ""
+
     username = request.POST["username"]
     password = request.POST["password"]
     email = request.POST["email"]
 
-    check1 = invalidUsername(username)
-    check2 = invalidPassword(password)
-    check3 = invalidEmail(email)
+    check = []
+    check.append(invalidUsername(username))
+    check.append(invalidPassword(password))
+    check.append(invalidEmail(email))
 
-    print(check1)
-    print(check2)
-    print(check3)
-    if ( 0 == check1 == check2 == check3):
+    if (check.count(check[0]) == len(check)): # If there are no errors
+        # Create user
         p1 = Student.objects.create(
             username = username,
             password = password,
@@ -68,22 +68,14 @@ def register(request): # POST
 
         p1.save()
 
-        return HttpResponse('User added successfully.')
+        return HttpResponse("User added successfully")
     
-    return HttpResponse('Task failed. Please try again.')
-
-
-
-    # p1 = Professor.objects.create(username = '',
-    #   forename = '',
-    #   surname = '',
-    #   password = '',
-    #   email = '',
-    #   admin = '',
-    #   accountType = '',
-    #   averageRating = '')
-
-    # p1.save()
+    # Concatenate error responses
+    response = []
+    for item in check:
+        if item!="":
+            response.append(item)
+    return HttpResponse("\n".join([str(p) for p in response]))
 
 
 @csrf_exempt
@@ -100,6 +92,8 @@ def login(request):
     Invoking this command will prompt the user to enter a username and password which are then sent
     to the service for authentication.
     '''
+
+
     return HttpResponse('not yet implemented')
 
 @csrf_exempt
