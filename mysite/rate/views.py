@@ -114,13 +114,6 @@ def apiLogin(request):
     Invoking this command will prompt the user to enter a username and password which are then sent
     to the service for authentication.
     '''
-    # username = request.POST['username']
-    # password = request.POST['password']
-
-    # user = authenticate(username=username, password=password)
-        # login(request, user)
-    # if user is not None:
-        # request.session["username"] = username # Set a session value:
     username = request.POST["username"]
     password = request.POST["password"]
 
@@ -139,7 +132,11 @@ def apiLogout(request):
     This causes the user to logout from the current session. The syntax for this command is:
      logout
     '''
+    keyList = []
     for key in request.session.keys():
+        keyList.append(key)
+
+    for key in keyList:
         del request.session[key]
 
     return HttpResponse("Logout successful.")

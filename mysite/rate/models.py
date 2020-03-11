@@ -20,6 +20,16 @@ class Student(models.Model):
     # def save(self, *args, **kwargs): # Generate Unique ID based on forename and surname
     #     user = User.objects.create_user(self.username, self.email, self.password)
     #     super(Student, self).save(*args, **kwargs)
+    def clean(self, *args, **kwargs): # Validation to prevent duplicate module instances
+        # Error check to prevent duplicate users from being entered via admin
+
+        # if len(query): # Raise error
+        #     errorMessage = "This module instance already exists. "
+        #     errorMessage+= "Please specify a different year, module or semester to continue."
+        #     raise ValidationError(errorMessage)
+
+        super(Student, self).clean(*args, **kwargs)
+
 
     def __str__(self):
         return str(self.username + ", " + self.email)
