@@ -164,12 +164,59 @@ def apiAverage(request):
     average
     This command is used to view the average rating of a certain professor in a certain module (Option 3
     above). The syntax of the command is:
-     average professor_id module_code
-    where:
-    professor_id is the unique id of a professor, and
-    module_code is the code of a module.
+        average professor_id module_code
     '''
-    return HttpResponse('not yet implemented')
+
+    # Check if professor ID exists
+    professorID = request.POST["professorID"] # professor_id is the unique id of a professor, and
+    professor   = Professor.objects.filter(professorID__exact=professorID)
+    if not len(professor):
+        return HttpResponse("No professor was found to have the specified ID.")
+    # Format of name for printing
+    profNameFormat = "Professor " + professor[0].forename[0] + ". " + professor[0].surname + " ("+professor[0].professorID+")"
+
+    # Check if the module code exists
+    print("\n\n\n")
+    moduleCode  = request.POST["moduleCode"] # module_code is the code of a module.
+    module      = Module.objects.filter(code__exact=moduleCode)
+    if not len(module):
+        return HttpResponse("The module code specified could not be found.")
+
+    # Check if any instances exist for the given module code
+    moduleInstanceQuery = ModuleInstance.objects.filter(module__exact=module[0])
+    if not len(moduleInstanceQuery):
+        return HttpResponse("No module instances could not be found for the specified module code.")
+
+    # Check if professor is present in any of the instances
+    instanceList = []
+    for instance in moduleInstanceQuery:              # Loop over instances
+        for professorObj in instance.professor.all(): # Loop over professors in instance
+            if professor[0] == professorObj:
+                instanceList.append(instance)         # Create list of valid instances
+
+    # No instances could be found for a given module
+    if not len(instanceList):
+        return HttpResponse(professor[0]+" was shown not to teach any instances "+module[0]+".")
+
+
+    ratingCount = 0
+    ratingTotal = 0
+    for instance in instanceList:
+        ratingQuery = Rating.objects.filter(instance__exact=instance).filter(professor__exact=professor[0])
+        ratingCount+= len(ratingQuery)
+        for rating in ratingQuery:
+            ratingTotal += rating.rating
+
+
+    if not ratingCount:
+        return HttpResponse("No ratings were found for "+profNameFormat+" in module "+module[0].title+" ("+module[0].code+")")
+
+
+    averageRating = round(ratingTotal/ratingCount)
+    ratingStars   = averageRating * "*"
+    return HttpResponse("The rating of "+profNameFormat+" in module "+module[0].title+" ("+module[0].code+") is "+ratingStars)
+
+
 
 
 
@@ -194,7 +241,7 @@ def apiRate(request):
         return HttpResponse("Semesters must be a semester number, e.g. 1 or 2.")
     semester = int(semester)
     if not (1<=semester<=2):
-        return HttpResponse("There are only two semesters in an academic year, i.e. 1 or 2.")
+        return HttpResponse("There are only two semesters in an academic year, i.e. Semester 1 - (Autumn) and Semester 2 - (Spring)")
 
     year = request.POST["year"] # year is a teaching year, e.g. 2018,
     if not year.isnumeric():

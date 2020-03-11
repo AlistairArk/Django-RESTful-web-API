@@ -30,8 +30,18 @@ print(r.text)
 payload = { "moduleCode" : "COMP4568",
             "professorID": "SW0",
             "year"       : "2017",
-            "semester"   : "2.5",
-            "rating"     : "4"}
+            "semester"   : "2",
+            "rating"     : "2"}
 
 r = s.post('http://127.0.0.1:8000/api/rate', data=payload)
+print(r.text)
+
+
+payload = { "moduleCode" : "COMP4568",
+            "professorID": "SW0",
+            "year"       : "2017",
+            "semester"   : "2",
+            "rating"     : "2"}
+
+r = s.post('http://127.0.0.1:8000/api/average', data=payload)
 print(r.text)
