@@ -10,18 +10,7 @@ import re
 
 
 
-    # # Check if user is logged in via session variables
 
-    # request.session['loggedIn'] #  = True
-    # # return request.session.get('loggedIn', False)
-    # return 0
-# def loginRequired(fn):
-#     @wraps(fn)
-#     def wrapped(request, *args, **kwargs):
-#         print("wowee",request.session['loggedIn'])
-#         # return "<b>" + fn(*args, **kwargs) + "</b>"
-
-#     return wrapped
 
 def loginRequired(function):
     def wrap(request, *args, **kwargs):
@@ -154,7 +143,7 @@ def apiList(request):
      list
     '''
     
-    
+
     return HttpResponse("\n".join([str(p) for p in ModuleInstance.objects.all()]))
 
 @csrf_exempt
@@ -203,7 +192,55 @@ def apiRate(request):
     '''
     # print(request.session['loggedIn']) #  = True
 
-    return HttpResponse('not yet implemented')
+
+    rating      = int(request.POST["rating"])
+    if not (0<=rating<=5):
+        return HttpResponse("Ratings must be between 0 & 5 stars.")
+
+    module      = request.POST["moduleCode"]
+    year        = request.POST["year"]
+    semester    = request.POST["semester"]
+    query = ModuleInstance.objects.filter(module__exact=module).filter(year__exact=year).filter(semester__exact=semester)
+    if not len(query):
+        return HttpResponse("Module instance not found.")
+
+
+    professorID = request.POST["professorID"]
+    professor = 0
+    for item in query[0].professor.all():
+        if professorID == item.professorID:
+            professor=item
+            break 
+
+    if not professor: # If no professor found
+        return HttpResponse("This module instance is not taught by the specified professor.")
+
+    instance = query[0]
+    username = request.session["username"]
+    student = Student.objects.filter(username__exact=username)[0]
+    query = Rating.objects.filter(instance__exact=instance).filter(student__exact=student).filter(professor__exact=professor)
+
+    if len(query): # if rating already exists
+        if query[0].rating == rating:
+            response = "You have already rated "+query[0].professor.professorID+" "+str(rating)+" Stars for this instance."
+            return HttpResponse(response)
+
+        response = "Rating updated from "+str(query[0].rating)+" to "+str(rating)+" Stars."
+        query[0].rating = rating
+        query[0].save()
+        return HttpResponse(response)
+
+    # Create rating
+    p1 = Rating.objects.create(
+        instance  = instance,
+        student   = student,
+        professor = professor,
+        rating    = rating)
+
+    p1.save()
+
+    return HttpResponse("Rating set successfully")
+
 
 @csrf_exempt
 def apiRedirect(request):

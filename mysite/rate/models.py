@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 
+
 class Student(models.Model):
     '''
     Users of the service (students) can rate professors but cannot add or change module information.
@@ -60,14 +61,14 @@ class Professor(models.Model):
     def __str__(self):
         return str(self.professorID + ", Professor " + self.forename[0] + ". " + self.surname)
 
-class Module(models.Model):
-    # module_id    = models.AutoField(primary_key=True)
 
+class Module(models.Model):
     code  = models.CharField(max_length=30, primary_key=True)
     title = models.CharField(max_length=30)
 
     def __str__(self):
         return str(self.code + ": " + self.title)
+
 
 class ModuleInstance(models.Model):
     '''
@@ -86,7 +87,6 @@ class ModuleInstance(models.Model):
 
 
     def clean(self, *args, **kwargs): # Validation to prevent duplicate module instances
-
         query = []
         try:
             # Check if identical module instance already exists (Shares same module/year/semester)
@@ -114,17 +114,14 @@ class Rating(models.Model):
 
     instance = models.ForeignKey(ModuleInstance, on_delete=models.CASCADE)
     student  = models.ForeignKey(Student, on_delete=models.CASCADE)
-    rating   = models.FloatField(choices=ratingChoice)
+    professor= models.ForeignKey(Professor, on_delete=models.CASCADE)
+    rating   = models.IntegerField(choices=ratingChoice)
+
+    def clean(self, *args, **kwargs): # Validation to prevent duplicate module instances
+        # Dont allow duplicate ratings
+        super(Rating, self).clean(*args, **kwargs)
 
     def __str__(self):
         return str(self.instance.module) + ", " + str(self.student.username) + ", " + str(int(self.rating)) + " stars" 
 
 
-
-# from django.db.models.signals import pre_save, post_save
-
-# @ModuleInstance(pre_save)
-# def pre_save_handler(sender, instance, *args, **kwargs):
-#     # some case
-#     if case_error:
-#         raise Exception('OMG')
