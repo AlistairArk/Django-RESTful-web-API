@@ -4,17 +4,40 @@ from django.http import HttpResponse
 from .models import Student, Professor, Module, ModuleInstance, Rating
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import user_passes_test
+from functools import wraps
 
 import re
 
 
 
-def loginRequired(func):
-    # Check if user is logged in via session variables
-    if request.session.get('loggedIn', None) == True:
-        return 1
-    return 0
+    # # Check if user is logged in via session variables
 
+    # request.session['loggedIn'] #  = True
+    # # return request.session.get('loggedIn', False)
+    # return 0
+# def loginRequired(fn):
+#     @wraps(fn)
+#     def wrapped(request, *args, **kwargs):
+#         print("wowee",request.session['loggedIn'])
+#         # return "<b>" + fn(*args, **kwargs) + "</b>"
+
+#     return wrapped
+
+def loginRequired(function):
+    def wrap(request, *args, **kwargs):
+        print("wowee",request.session['loggedIn'])
+        # session = request.session # this is a dictionary with session keys
+        # user = request.user
+        # if user.is_authenticated:
+        #     # the decorator is passed and you can handle the request from the view
+        return function(request, *args, **kwargs)
+        # else:
+        #     return redirect('login')
+
+
+    wrap.__doc__ = function.__doc__
+    wrap.__name__ = function.__name__
+    return wrap
 
 @csrf_exempt
 def apiRegister(request): # POST
@@ -101,10 +124,13 @@ def apiLogin(request):
         # login(request, user)
     # if user is not None:
         # request.session["username"] = username # Set a session value:
+    username = request.POST["username"]
+    password = request.POST["password"]
+
     if len(Student.objects.filter(username__exact=username).filter(password__exact=password)):
-        return HttpResponse("Welcome!")
         request.session['loggedIn'] = True
         request.session['username'] = username
+        return HttpResponse("Welcome!")
     else:
         return HttpResponse("The username or password could not be found.")
 
@@ -161,8 +187,9 @@ def apiAverage(request):
 
 
 
+# @user_passes_test(loginRequired, login_url='redirect/')
 @csrf_exempt
-@user_passes_test(loginRequired, login_url='redirect/')
+@loginRequired
 def apiRate(request):
     '''
     rate
@@ -175,6 +202,8 @@ def apiRate(request):
     semester      is a semester number, e.g. 2, and
     rating        is a numerical value between 1-5.
     '''
+    print(request.session['loggedIn']) #  = True
+
     return HttpResponse('not yet implemented')
 
 @csrf_exempt

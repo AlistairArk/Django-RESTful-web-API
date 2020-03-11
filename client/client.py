@@ -1,10 +1,13 @@
 import requests
 
+s = requests.Session()
+
 payload = { 'username': 'sc17jhd',
             'password': 'blakew',
-            "email": "abc#def@mail.com"}
+            "email": "abcdef@mail.com"}
 # r = requests.get('http://127.0.0.1:8000/api/register', params=payload)
-r = requests.post('http://127.0.0.1:8000/api/rate', data=payload)
+# r = s.post('http://127.0.0.1:8000/api/login', data=payload)
+# print(r.text)
 
-print(r.url)
+r = s.get('http://127.0.0.1:8000/api/rate', data=payload)
 print(r.text)
