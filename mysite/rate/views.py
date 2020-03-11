@@ -1,5 +1,5 @@
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .models import Student, Professor, Module, ModuleInstance, Rating
 from django.contrib.auth import authenticate, login
@@ -25,14 +25,11 @@ import re
 
 def loginRequired(function):
     def wrap(request, *args, **kwargs):
-        print("wowee",request.session['loggedIn'])
-        # session = request.session # this is a dictionary with session keys
-        # user = request.user
-        # if user.is_authenticated:
-        #     # the decorator is passed and you can handle the request from the view
-        return function(request, *args, **kwargs)
-        # else:
-        #     return redirect('login')
+        
+        if request.session.get("loggedIn", False):
+            return function(request, *args, **kwargs)
+
+        return redirect("redirect/")
 
 
     wrap.__doc__ = function.__doc__
@@ -135,7 +132,7 @@ def apiLogin(request):
         return HttpResponse("The username or password could not be found.")
 
 @csrf_exempt
-@user_passes_test(loginRequired, login_url='redirect/')
+@loginRequired
 def apiLogout(request):
     '''
     logout
@@ -148,7 +145,7 @@ def apiLogout(request):
     return HttpResponse("Logout successful.")
 
 @csrf_exempt
-@user_passes_test(loginRequired, login_url='redirect/')
+@loginRequired
 def apiList(request):
     '''
     list
@@ -159,7 +156,7 @@ def apiList(request):
     return HttpResponse('not yet implemented')
 
 @csrf_exempt
-@user_passes_test(loginRequired, login_url='redirect/')
+@loginRequired
 def apiView(request):
     '''
     view
@@ -170,7 +167,7 @@ def apiView(request):
     return HttpResponse('not yet implemented')
 
 @csrf_exempt
-@user_passes_test(loginRequired, login_url='redirect/')
+@loginRequired
 def apiAverage(request):
     '''
     average
@@ -187,7 +184,7 @@ def apiAverage(request):
 
 
 
-# @user_passes_test(loginRequired, login_url='redirect/')
+# @loginRequired
 @csrf_exempt
 @loginRequired
 def apiRate(request):
@@ -202,7 +199,7 @@ def apiRate(request):
     semester      is a semester number, e.g. 2, and
     rating        is a numerical value between 1-5.
     '''
-    print(request.session['loggedIn']) #  = True
+    # print(request.session['loggedIn']) #  = True
 
     return HttpResponse('not yet implemented')
 
