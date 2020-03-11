@@ -29,9 +29,9 @@ print(r.text)
 # COMP4568: Programming For The Web, 2005, Semester 1, ZH0
 payload = { "moduleCode" : "COMP4568",
             "professorID": "SW0",
-            "year"       : 2017,
-            "semester"   : 2,
-            "rating"     : 4}
+            "year"       : "2017",
+            "semester"   : "2.5",
+            "rating"     : "4"}
 
 r = s.post('http://127.0.0.1:8000/api/rate', data=payload)
 print(r.text)

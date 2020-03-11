@@ -83,7 +83,7 @@ class ModuleInstance(models.Model):
     professor = models.ManyToManyField(Professor)
     module    = models.ForeignKey(Module, on_delete=models.CASCADE)
     year      = models.IntegerField(choices=yearList)
-    semester  = models.IntegerField(choices=[(1, "Semester 1"), (2, "Semester 2")])
+    semester  = models.IntegerField(choices=[(1, "Semester 1 - (Autumn)"), (2, "Semester 2 - (Spring)")])
 
 
     def clean(self, *args, **kwargs): # Validation to prevent duplicate module instances

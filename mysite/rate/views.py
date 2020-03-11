@@ -175,36 +175,40 @@ def apiAverage(request):
 
 
 
-# @loginRequired
 @csrf_exempt
 @loginRequired
 def apiRate(request):
-    '''
-    rate
-    This is used to rate the teaching of a certain professor in a certain module instance (Option 4 above).
-    It has the following syntax:
+    '''This is used to rate the teaching of a certain professor in a certain module instance (Option 4 above).'''
 
-    professor_id  is the unique id of a professor, e.g. JE1,
-    module_code   is the code of a module, e.g. CD1,
-    year          is a teaching year, e.g. 2018,
-    semester      is a semester number, e.g. 2, and
-    rating        is a numerical value between 1-5.
-    '''
-    # print(request.session['loggedIn']) #  = True
+    # Check rating is a numerical value between 1-5.
+    rating = request.POST["rating"]
+    if not rating.isnumeric():
+        return HttpResponse("Ratings must be numerical values.")
+    rating = int(rating)
+    if not (1<=rating<=5):
+        return HttpResponse("Ratings must be a value between 1-5 stars.")
 
+    # Check semester is a semester number, e.g. 1 or 2
+    semester = request.POST["semester"]
+    if not semester.isnumeric():
+        return HttpResponse("Semesters must be a semester number, e.g. 1 or 2.")
+    semester = int(semester)
+    if not (1<=semester<=2):
+        return HttpResponse("There are only two semesters in an academic year, i.e. 1 or 2.")
 
-    rating      = int(request.POST["rating"])
-    if not (0<=rating<=5):
-        return HttpResponse("Ratings must be between 0 & 5 stars.")
+    year = request.POST["year"] # year is a teaching year, e.g. 2018,
+    if not year.isnumeric():
+        return HttpResponse("Years must be numerical values, e.g. 2018")
+    year = int(year)
 
-    module      = request.POST["moduleCode"]
-    year        = request.POST["year"]
-    semester    = request.POST["semester"]
+    module = request.POST["moduleCode"]  # module is the code of a module, e.g. CD1,
     query = ModuleInstance.objects.filter(module__exact=module).filter(year__exact=year).filter(semester__exact=semester)
     if not len(query):
         return HttpResponse("Module instance not found.")
 
 
+    # professor_id is the UID (unique id) of a professor, e.g. JE1
+    # Verify the UID for a professor is present in the given instance
     professorID = request.POST["professorID"]
     professor = 0
     for item in query[0].professor.all():
@@ -220,17 +224,20 @@ def apiRate(request):
     student = Student.objects.filter(username__exact=username)[0]
     query = Rating.objects.filter(instance__exact=instance).filter(student__exact=student).filter(professor__exact=professor)
 
-    if len(query): # if rating already exists
+    # Update students previous rating if rating already exists
+    if len(query):
+        # Check if the new rating is different to the old one
         if query[0].rating == rating:
             response = "You have already rated "+query[0].professor.professorID+" "+str(rating)+" Stars for this instance."
             return HttpResponse(response)
 
+        # Update the students rating
         response = "Rating updated from "+str(query[0].rating)+" to "+str(rating)+" Stars."
         query[0].rating = rating
         query[0].save()
         return HttpResponse(response)
 
-    # Create rating
+    # Create new rating
     p1 = Rating.objects.create(
         instance  = instance,
         student   = student,
