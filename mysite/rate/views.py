@@ -132,10 +132,13 @@ def apiLogout(request):
     This causes the user to logout from the current session. The syntax for this command is:
      logout
     '''
+
+    # Get a list of session variables
     keyList = []
     for key in request.session.keys():
         keyList.append(key)
 
+    # Delete session variables
     for key in keyList:
         del request.session[key]
 
@@ -150,7 +153,9 @@ def apiList(request):
     1 above). The syntax for this command is:
      list
     '''
-    return HttpResponse('not yet implemented')
+    
+    
+    return HttpResponse("\n".join([str(p) for p in ModuleInstance.objects.all()]))
 
 @csrf_exempt
 @loginRequired
