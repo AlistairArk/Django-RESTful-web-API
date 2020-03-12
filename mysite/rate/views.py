@@ -39,6 +39,9 @@ def apiRegister(request): # POST
         if not len(username) or len(username)>=30: # check username length
             return "Username must be between 1 and 30 characters in length."
 
+        if " " in username: # check username for illegal characters
+            return "Username must be between 1 and 30 characters in length."
+
         return ""
 
 
@@ -76,7 +79,7 @@ def apiRegister(request): # POST
 
         p1.save()
 
-        return HttpResponse("User added successfully")
+        return HttpResponse("")
     
     # Concatenate error responses
     response = []
