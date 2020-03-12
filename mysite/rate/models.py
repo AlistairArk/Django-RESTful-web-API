@@ -11,23 +11,25 @@ class Student(models.Model):
     Before they can rate professors, users must register by providing a username, email, and password.
     Users can only rate professors when they are logged in to the service. 
     '''
-    # student_id = models.AutoField(primary_key=True)
 
     username = models.CharField(max_length=30)
     password = models.CharField(max_length=30)
     email = models.EmailField(max_length=50)
 
-
-    # def save(self, *args, **kwargs): # Generate Unique ID based on forename and surname
-    #     user = User.objects.create_user(self.username, self.email, self.password)
-    #     super(Student, self).save(*args, **kwargs)
     def clean(self, *args, **kwargs): # Validation to prevent duplicate module instances
         # Error check to prevent duplicate users from being entered via admin
+        query = []
+        try:
+            # Check if identical user instance already exists (Shares same username)
+            query = Student.objects.filter(username__exact=self.username)
+        except Exception as e:
+            pass # Exception raised if user hasn't selected a module
 
-        # if len(query): # Raise error
-        #     errorMessage = "This module instance already exists. "
-        #     errorMessage+= "Please specify a different year, module or semester to continue."
-        #     raise ValidationError(errorMessage)
+        if len(query): # Raise error
+            # Dont allow duplicate users/ Remove previous instance if it already exists
+            query[0].delete()
+            print("removing dupe")
+
 
         super(Student, self).clean(*args, **kwargs)
 
@@ -45,7 +47,7 @@ class Professor(models.Model):
     forename = models.CharField(max_length=30)
     surname = models.CharField(max_length=30)
     professorID = models.CharField(max_length=30, editable=False)
-    # defaultID = (str(self.forename)[0]+str(self.surname)[0]).capitalize()
+
 
     def save(self, *args, **kwargs): # Generate Unique ID based on forename and surname
         uid = str(self.forename)[0] + str(self.surname)[0]  # Unique ID
@@ -95,10 +97,11 @@ class ModuleInstance(models.Model):
             pass # Exception raised if user hasn't selected a module
 
         if len(query): # Raise error
-            errorMessage = "This module instance already exists. "
-            errorMessage+= "Please specify a different year, module or semester to continue."
-            raise ValidationError(errorMessage)
+            # Dont allow duplicate module instances / Remove previous instance if it already exists
+            query[0].delete()
+            print("removing dupe")
 
+           
         super(ModuleInstance, self).clean(*args, **kwargs)
 
     def __str__(self):
@@ -118,10 +121,36 @@ class Rating(models.Model):
     rating   = models.IntegerField(choices=ratingChoice)
 
     def clean(self, *args, **kwargs): # Validation to prevent duplicate module instances
-        # Dont allow duplicate ratings
+
+        errorMessage = ""
+        try:
+            # Verify the UID for a professor is present in the given instance
+            profFound = 0
+            for item in self.instance.professor.all():
+                if self.professor == item:
+                    profFound = 1
+                    break 
+
+            if not profFound:
+                errorMessage = str(self.professor) + " does not teach " + str(self.instance) + ". "
+                raise
+
+            else:
+                query = Rating.objects.filter(instance__exact=self.instance).filter(student__exact=self.student).filter(professor__exact=self.professor)
+                # Dont allow duplicate ratings / Remove previous rating if it already exists
+                if len(query):
+                    query[0].delete()
+
+        except Exception as e:
+            if errorMessage != "":
+                raise ValidationError(errorMessage)
+
         super(Rating, self).clean(*args, **kwargs)
 
+
     def __str__(self):
-        return str(self.instance.module) + ", " + str(self.student.username) + ", " + str(int(self.rating)) + " stars" 
+        instanceName = str(self.instance.module) + ", " + str(self.instance.year) + ", Semester " + str(self.instance.semester)
+
+        return str(self.student.username) +  " rated "  + str(self.professor.professorID) + " " + str(int(self.rating)) + " stars for " + instanceName
 
 

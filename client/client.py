@@ -19,7 +19,7 @@ print(r.text)
 # print(r.text)
 
 
-r = s.get('http://127.0.0.1:8000/api/list', data=payload)
+r = s.get('http://127.0.0.1:8000/api/list')
 print(r.text)
 
 
@@ -44,4 +44,10 @@ payload = { "moduleCode" : "COMP4568",
             "rating"     : "2"}
 
 r = s.post('http://127.0.0.1:8000/api/average', data=payload)
+print(r.text)
+
+
+print("\n\n")
+
+r = s.get('http://127.0.0.1:8000/api/view')
 print(r.text)

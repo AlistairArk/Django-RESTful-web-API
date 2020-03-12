@@ -27,13 +27,10 @@ def loginRequired(function):
 
 @csrf_exempt
 def apiRegister(request): # POST
-    ''' register
-    This is used to allow a user to register to the service using a username, email and a password. When
-    the command is invoked, the program prompts the user to enter the username, email, and password
-    of the new user. The syntax for this command is:
+    ''' This is used to allow a user to register to the service using a username, email and a password.
+    When the command is invoked, the program prompts the user to enter the username, email,
+    and password of the new user.'''
 
-    register
-    '''
     def invalidUsername(username): # Ensure the username entered meets username standards
 
         if Student.objects.filter(username__exact=username): # check if username is taken
@@ -90,19 +87,9 @@ def apiRegister(request): # POST
 
 
 @csrf_exempt
-def apiLogin(request):
-    ''' login
-    This command is used to log in to the service. The syntax for this command is:
+def apiLogin(request): # POST
+    ''' This command is used to log in to the service.'''
 
-    login url 
-
-    where:
-    url is the address of the service. Since you will be hosting your web service at
-    www.pythonanywhere.com, this should be something like ‘xxxxxx.pyhtonanywhere.com’, where
-    xxxxxx is your university username.
-    Invoking this command will prompt the user to enter a username and password which are then sent
-    to the service for authentication.
-    '''
     username = request.POST["username"]
     password = request.POST["password"]
 
@@ -113,14 +100,12 @@ def apiLogin(request):
     else:
         return HttpResponse("The username or password could not be found.")
 
+
+
 @csrf_exempt
 @loginRequired
-def apiLogout(request):
-    '''
-    logout
-    This causes the user to logout from the current session. The syntax for this command is:
-     logout
-    '''
+def apiLogout(request): # POST
+    ''' This causes the user to logout from the current session. '''
 
     # Get a list of session variables
     keyList = []
@@ -133,39 +118,60 @@ def apiLogout(request):
 
     return HttpResponse("Logout successful.")
 
+
+
 @csrf_exempt
 @loginRequired
-def apiList(request):
-    '''
-    list
-    This is used to view a list of all module instances and the professor(s) teaching each of them (Option
-    1 above). The syntax for this command is:
-     list
-    '''
+def apiList(request): # GET
+    ''' This is used to view a list of all module instances and the professor(s) teaching each of them (Option 1 above).'''
     
-
     return HttpResponse("\n".join([str(p) for p in ModuleInstance.objects.all()]))
+
+
 
 @csrf_exempt
 @loginRequired
 def apiView(request):
-    '''
-    view
-    This command is used to view the rating of all professors (Option 2 above). The syntax for this
-    command is:
-     view
-    '''
-    return HttpResponse('not yet implemented')
+    ''' This command is used to view the rating of all professors (Option 2 above).'''
+
+    # Get a list of all professors
+    professorObj= Professor.objects.all()
+    if not len(professorObj):
+        return HttpResponse("You may not view ratings at this time: No professors were found to be stored in the server database.")
+    
+    ratingList   = []
+    noRatingList = []
+    for professor in professorObj:
+        # Find all ratings for a given professor
+        ratingQuery = Rating.objects.filter(professor__exact=professor)
+        ratingCount = len(ratingQuery)
+        ratingTotal = 0
+        for rating in ratingQuery:
+            ratingTotal += rating.rating
+
+        profNameFormat = "Professor " + professor.forename[0] + ". " + professor.surname + " ("+professor.professorID+")"
+
+        if ratingCount:
+            averageRating = round(ratingTotal/ratingCount)
+            ratingStars   = averageRating * "*"
+            ratingList.append("The rating of "+profNameFormat+" is "+ ratingStars)
+        else:
+            noRatingList.append(profNameFormat+" has not received any ratings yet.")
+
+    response = "\n".join([str(p) for p in ratingList])
+    if len(noRatingList):
+        if len(ratingList):
+            response+="\n"
+        response+= "\n".join([str(p) for p in noRatingList])
+
+    return HttpResponse(response)
+
+
 
 @csrf_exempt
 @loginRequired
 def apiAverage(request):
-    '''
-    average
-    This command is used to view the average rating of a certain professor in a certain module (Option 3
-    above). The syntax of the command is:
-        average professor_id module_code
-    '''
+    ''' This command is used to view the average rating of a certain professor in a certain module '''
 
     # Check if professor ID exists
     professorID = request.POST["professorID"] # professor_id is the unique id of a professor, and
@@ -198,7 +204,7 @@ def apiAverage(request):
     if not len(instanceList):
         return HttpResponse(professor[0]+" was shown not to teach any instances "+module[0]+".")
 
-
+    # Calculate averages
     ratingCount = 0
     ratingTotal = 0
     for instance in instanceList:
@@ -207,18 +213,12 @@ def apiAverage(request):
         for rating in ratingQuery:
             ratingTotal += rating.rating
 
-
     if not ratingCount:
         return HttpResponse("No ratings were found for "+profNameFormat+" in module "+module[0].title+" ("+module[0].code+")")
-
 
     averageRating = round(ratingTotal/ratingCount)
     ratingStars   = averageRating * "*"
     return HttpResponse("The rating of "+profNameFormat+" in module "+module[0].title+" ("+module[0].code+") is "+ratingStars)
-
-
-
-
 
 
 
@@ -294,6 +294,7 @@ def apiRate(request):
     p1.save()
 
     return HttpResponse("Rating set successfully")
+
 
 
 @csrf_exempt
