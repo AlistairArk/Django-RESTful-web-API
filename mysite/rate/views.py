@@ -40,7 +40,7 @@ def apiRegister(request): # POST
             return "Username must be between 1 and 30 characters in length."
 
         if " " in username: # check username for illegal characters
-            return "Username must be between 1 and 30 characters in length."
+            return "Usernames may not contain spaces."
 
         return ""
 

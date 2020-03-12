@@ -7,7 +7,7 @@ command = []
 mainLoop = 1    # used to keep the main loop running until the program terminates
 
 def main():
-    global mainLoop
+    global mainLoop, command
 
     while mainLoop:
         # Get user input - strip it of trailing spaces - split it into it's components
@@ -39,7 +39,8 @@ def main():
 
 def ArgumentsSupplied(requiredArguments):
     '''Check and output messages to notify the user if too many or too few arguments are supplied'''
-    suppliedArguments = len(command) + 1
+    suppliedArguments = len(command)
+    print(suppliedArguments,requiredArguments,command)
     if requiredArguments==suppliedArguments: # Amount of arguments required and supplied match
         return True
     elif requiredArguments>suppliedArguments:
@@ -56,9 +57,10 @@ def Help():
     print("\n== Help ==\n")
 
     print("Register to the service.\n    register\n")
-    print("Login to the service.\n    login sc17jhd.pyhtonanywhere.com\n")
+    print("Login to the service.\n    login sc17jhd.pythonanywhere.com\n")
     print("Logout from the current session.\n    logout\n")
     print("View a list of all module instances and the professor(s) teaching each of them.\n    list\n")
+    print("View the rating of all professors.\n    view\n")
     print("View the average rating of a certain professor in a certain module\n    average professor_id module_code\n")
     print("Rate the teaching of a certain professor in a certain module instance\n    rate professor_id module_code year semester rating\n")
 
@@ -95,10 +97,10 @@ def Register(): # POST (sending account details)
     global s
     r = s.get(webAddress + "/api/register", params=payload)
     
-    if r.text == "":
+    if "\n"+r.text+"\n" == "":
         print("User registered successfully!")
     else:
-        print("Your registration request was denied for the following reasons:\n"+r.text)
+        print("Your registration request was denied for the following reasons:\n"+"\n"+r.text+"\n")
 
 
 
@@ -117,12 +119,12 @@ def Login(): # POST (sending login details)
         try:
             global s
             r = s.post(command[1] + "/api/login", params=payload)
-            print(r.text)
+            print("\n"+r.text+"\n")
         except Exception as e:
             serviceReachError()
     else:
-        print("Sorry, url you have entered is either supported or invalid.")
-        print("Please try again, with the following URL: "+supportedURLs[1])
+        print("Sorry, the URL you have entered is either unsupported or invalid.")
+        print("Consider using the following URL and try again: "+supportedURLs[1])
 
 
 
@@ -136,7 +138,7 @@ def Logout(): # GET (No payload being sent)
     ''' This causes the user to logout from the current session '''
     global s
     r = s.post(webAddress+"/api/logout")
-    print(r.text)
+    print("\n"+r.text+"\n")
 
 
 
@@ -144,7 +146,7 @@ def List(): # GET (Getting list of module instances)
     '''This is used to view a list of all module instances and the professor(s) teaching each of them'''
     global s
     r = s.get(webAddress+"/api/list")
-    print(r.text)
+    print("\n"+r.text+"\n")
 
 
 
@@ -152,7 +154,7 @@ def View(): # GET (Getting list of professor ratings)
     ''' This command is used to view the rating of all professors '''
     global s
     r = s.get(webAddress+"/api/view")
-    print(r.text)
+    print("\n"+r.text+"\n")
 
 
 
@@ -163,7 +165,7 @@ def Average():
 
     global s
     r = s.post(webAddress+"/api/average", data=payload)
-    print(r.text)
+    print("\n"+r.text+"\n")
 
     
 
@@ -179,7 +181,7 @@ def Rate(): # POST
 
     global s
     r = s.post(webAddress+"/api/rate", data=payload)
-    print(r.text)
+    print("\n"+r.text+"\n")
 
 
 
