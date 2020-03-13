@@ -68,10 +68,11 @@ def Help():
     print("Register to the service.\n    register")
     print("Login to the service.\n    login sc17jhd.pythonanywhere.com")
     print("Logout from the current session.\n    logout")
-    print("View a list of all module instances and the professor(s) teaching each of them.\n    list")
+    print("List all module instances and the professor(s) teaching each of them.\n    list")
     print("View the rating of all professors.\n    view")
     print("View the average rating of a certain professor in a certain module\n    average professor_id module_code")
     print("Rate the teaching of a certain professor in a certain module instance\n    rate professor_id module_code year semester rating")
+    print("Terminate the program.\n    exit")
     print()
 
 # def Exit():
