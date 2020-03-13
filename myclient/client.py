@@ -1,8 +1,8 @@
 import requests
 
 s = requests.Session()  # Create session in which all requests will take place
-webAddress = "http://sc17jhd.pythonanywhere.com" # Address of my site / webAPI (not hard-coded for the sake of local testing)
 supportedURLs = ["sc17jhd.pythonanywhere.com","http://127.0.0.1:8000"]
+webAddress = supportedURLs[0] # Address of my site / webAPI (not hard-coded for the sake of local testing)
 command = []
 mainLoop = 1     # Used to keep the main loop running until the program terminates
 wrongArg = 0     # Used in handling which error messages are displayed to the user 

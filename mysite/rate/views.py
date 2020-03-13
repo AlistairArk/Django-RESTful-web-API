@@ -186,7 +186,11 @@ def apiView(request):
             profNameFormat = "Professor " + professor.forename[0] + ". " + professor.surname + " ("+professor.professorID+")"
 
             if ratingCount:
-                averageRating = round(ratingTotal/ratingCount)
+                averageRating = (ratingTotal/ratingCount)
+                if averageRating % 0.5 == 0: # round error fix
+                    averageRating+=.1
+                averageRating = round (averageRating)
+
                 ratingStars   = averageRating * "*"
                 ratingList.append("The rating of "+profNameFormat+" is "+ ratingStars)
             else:
@@ -224,7 +228,6 @@ def apiAverage(request):
         profNameFormat = "Professor " + professor[0].forename[0] + ". " + professor[0].surname + " ("+professor[0].professorID+")"
 
         # Check if the module code exists
-        print("\n\n\n")
         moduleCode  = request.POST["moduleCode"] # module_code is the code of a module.
         module      = Module.objects.filter(code__exact=moduleCode)
         if not len(module):
@@ -258,7 +261,11 @@ def apiAverage(request):
         if not ratingCount:
             return HttpResponse("No ratings were found for "+profNameFormat+" in module "+module[0].title+" ("+module[0].code+")")
 
-        averageRating = round(ratingTotal/ratingCount)
+        averageRating = (ratingTotal/ratingCount)
+        if averageRating % 0.5 == 0: # round error fix
+            averageRating+=.1
+        averageRating = round (averageRating)
+
         ratingStars   = averageRating * "*"
         return HttpResponse("The rating of "+profNameFormat+" in module "+module[0].title+" ("+module[0].code+") is "+ratingStars)
 
