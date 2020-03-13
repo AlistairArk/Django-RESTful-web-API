@@ -186,15 +186,6 @@ def Rate(): # POST
 
 
 
-# print("=== Ratings Client Application ===\n")
-# main() # Run Main Loop
-
-
-
-
-
-# payload = { "username": "username",
-#         "password": "password"}
-
-
+print("=== Ratings Client Application ===\n")
+main() # Run Main Loop
 
