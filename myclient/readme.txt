@@ -8,6 +8,11 @@ To operate the client, cmd into the “myclient” directory and run the followi
 Ensure you are using python 3. Note, you may need to run this from within a virtual environment if attempting to run it off DEC-10 machines as DEC-10’s version of requests may be out of date. 
 
 
+Superuser Admin Cradentials:
+    sc17jhd.pythonanywhere.com/admin
+    ammar
+    pass123
+
 
 Command syntax:
 
