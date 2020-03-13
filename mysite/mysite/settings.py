@@ -25,7 +25,7 @@ SECRET_KEY = 'uo)sl4^@9t)6+c!ixopb28$jn$q9jjl$^=hfq17gs9-tqo!jy6'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["sc17jhd.pythonanywhere.com"]
+ALLOWED_HOSTS = ["sc17jhd.pythonanywhere.com","127.0.0.1"]
 
 
 # Application definition
@@ -118,4 +118,4 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = '/home/sc17jhd/Django-RESTful-web-API/mysite/static/'
