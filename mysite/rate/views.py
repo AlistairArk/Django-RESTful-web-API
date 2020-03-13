@@ -8,7 +8,7 @@ from functools import wraps
 
 import re
 
-
+debugMode = 1
 
 
 
@@ -58,7 +58,7 @@ def apiRegister(request): # POST
 
             regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
             if not re.search(regex,email):
-                return "Invalid email."
+                return "Invalid email format."
 
             return ""
 
@@ -90,7 +90,10 @@ def apiRegister(request): # POST
         return HttpResponse("\n".join([str(p) for p in response]))
 
     except Exception as e:
-        print(e)
+        if debugMode:
+            raise e
+        else:
+            print(e)
         return HttpResponse("Invalid Request")
 
 
@@ -107,12 +110,15 @@ def apiLogin(request): # POST
         if len(Student.objects.filter(username__exact=username).filter(password__exact=password)):
             request.session['loggedIn'] = True
             request.session['username'] = username
-            return HttpResponse("Welcome!")
+            return HttpResponse("Login successful!")
         else:
-            return HttpResponse("The username or password could not be found.")
+            return HttpResponse("The user name or password is incorrect.")
 
     except Exception as e:
-        print(e)
+        if debugMode:
+            raise e
+        else:
+            print(e)
         return HttpResponse("Invalid Request")
 
 
@@ -148,7 +154,10 @@ def apiList(request): # GET
     try:
         return HttpResponse("\n".join([str(p) for p in ModuleInstance.objects.all()]))
     except Exception as e:
-        print(e)
+        if debugMode:
+            raise e
+        else:
+            print(e)
         return HttpResponse("Invalid Request")
 
 
@@ -192,7 +201,10 @@ def apiView(request):
         return HttpResponse(response)
 
     except Exception as e:
-        print(e)
+        if debugMode:
+            raise e
+        else:
+            print(e)
         return HttpResponse("Invalid Request")
 
 
@@ -251,7 +263,10 @@ def apiAverage(request):
         return HttpResponse("The rating of "+profNameFormat+" in module "+module[0].title+" ("+module[0].code+") is "+ratingStars)
 
     except Exception as e:
-        print(e)
+        if debugMode:
+            raise e
+        else:
+            print(e)
         return HttpResponse("Invalid Request")
 
 
@@ -333,7 +348,10 @@ def apiRate(request):
         return HttpResponse("Rating set successfully")
 
     except Exception as e:
-        print(e)
+        if debugMode:
+            raise e
+        else:
+            print(e)
         return HttpResponse("Invalid Request")
 
 

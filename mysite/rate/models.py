@@ -105,8 +105,9 @@ class ModuleInstance(models.Model):
         super(ModuleInstance, self).clean(*args, **kwargs)
 
     def __str__(self):
-        toReturn = str(self.module) + ", " + str(self.year) + ", Semester " + str(self.semester)
-        toReturn+= ", " + ", ".join([str(p.professorID) for p in self.professor.all()])
+        toReturn = str(self.module.title) + " (" + str(self.module.code) + ")" 
+        toReturn+= ", Semester " + str(self.semester) + ", Year " + str(self.year) 
+        toReturn+= ", Taught by " + ", ".join([str(p.professorID) for p in self.professor.all()])
         return toReturn
   
 

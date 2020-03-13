@@ -4,12 +4,15 @@ s = requests.Session()  # Create session in which all requests will take place
 webAddress = "http://127.0.0.1:8000" # Address of my site / webAPI (not hard-coded for the sake of local testing)
 supportedURLs = ["sc17jhd.pythonanywhere.com","http://127.0.0.1:8000", "127.0.0.1:8000"]
 command = []
-mainLoop = 1    # used to keep the main loop running until the program terminates
+mainLoop = 1    # Used to keep the main loop running until the program terminates
+wrongArg = 0    # Used in handling which error messages are displayed to the user 
 
 def main():
-    global mainLoop, command
+    global mainLoop, command, wrongArg
 
     while mainLoop:
+        wrongArg = 0
+
         # Get user input - strip it of trailing spaces - split it into it's components
         command = input("Please enter a command: ").strip().split(" ")
 
@@ -25,29 +28,33 @@ def main():
             View()
         elif command[0] == "average" and ArgumentsSupplied(3):
             Average()
-        elif command[0] == "rate" and ArgumentsSupplied(1):
+        elif command[0] == "rate" and ArgumentsSupplied(6):
             Rate()
         elif command[0] == "help" and ArgumentsSupplied(1):
             Help()      # Display a list of commands
         elif command[0] == "exit" and ArgumentsSupplied(1):
             # Exit()      # Terminate the program
             return
-        else:
+        elif not wrongArg:
+            print("\nSorry, the command you entered was invalid.")
             Invalid()   # The command entered could not be found
 
 
 
 def ArgumentsSupplied(requiredArguments):
     '''Check and output messages to notify the user if too many or too few arguments are supplied'''
+    global wrongArg
+    wrongArg = 1
     suppliedArguments = len(command)
-    print(suppliedArguments,requiredArguments,command)
+
     if requiredArguments==suppliedArguments: # Amount of arguments required and supplied match
         return True
     elif requiredArguments>suppliedArguments:
-        print("Too few arguments supplied. Please try again.")
+        print("\nToo few arguments supplied.")
     elif requiredArguments<suppliedArguments:
-        print("Too many arguments supplied. Please try again.")
+        print("\nToo many arguments supplied.")
 
+    Invalid()
 
 
 
@@ -56,14 +63,14 @@ def Help():
 
     print("\n== Help ==\n")
 
-    print("Register to the service.\n    register\n")
-    print("Login to the service.\n    login sc17jhd.pythonanywhere.com\n")
-    print("Logout from the current session.\n    logout\n")
-    print("View a list of all module instances and the professor(s) teaching each of them.\n    list\n")
-    print("View the rating of all professors.\n    view\n")
-    print("View the average rating of a certain professor in a certain module\n    average professor_id module_code\n")
-    print("Rate the teaching of a certain professor in a certain module instance\n    rate professor_id module_code year semester rating\n")
-
+    print("Register to the service.\n    register")
+    print("Login to the service.\n    login sc17jhd.pythonanywhere.com")
+    print("Logout from the current session.\n    logout")
+    print("View a list of all module instances and the professor(s) teaching each of them.\n    list")
+    print("View the rating of all professors.\n    view")
+    print("View the average rating of a certain professor in a certain module\n    average professor_id module_code")
+    print("Rate the teaching of a certain professor in a certain module instance\n    rate professor_id module_code year semester rating")
+    print()
 
 # def Exit():
 #     ''' End the program '''
@@ -74,7 +81,7 @@ def Help():
 
 
 def Invalid():
-    print("\nSorry, the command you entered is invalid.\nPlease type 'help' if you wish to show a list of available commands.\n")
+    print("Please type 'help' if you wish to view a list of available commands.\n")
 
 
 
@@ -86,7 +93,7 @@ def Register(): # POST (sending account details)
     # notRegistered = 0
     # while notRegistered: # Loop until registration is carried out successfully
 
-    print("\n== Register ==\n")
+    print("\n\n== Register ==")
     username = input("Please enter a username: ")
     password = input("Please enter a password: ")
     email = input("Please enter your email: ")
@@ -95,12 +102,12 @@ def Register(): # POST (sending account details)
                 "password": password,
                 "email": email }
     global s
-    r = s.get(webAddress + "/api/register", data=payload)
+    r = s.post(webAddress + "/api/register", data=payload)
     
-    if "\n"+r.text+"\n" == "":
-        print("User registered successfully!")
+    if r.text == "":
+        print("\nUser registered successfully!\n")
     else:
-        print("Your registration request was denied for the following reasons:\n"+"\n"+r.text+"\n")
+        print("\nYour registration request was denied for the following reasons:\n"+r.text+"\n")
 
 
 
@@ -118,7 +125,7 @@ def Login(): # POST (sending login details)
 
         try:
             global s
-            r = s.post(command[1] + "/api/login", data=payload)
+            r = s.post(webAddress + "/api/login", data=payload)
             print("\n"+r.text+"\n")
         except Exception as e:
             serviceReachError()
@@ -136,6 +143,8 @@ def serviceReachError():
 
 def Logout(): # GET (No payload being sent)
     ''' This causes the user to logout from the current session '''
+    print("\n\n== Logout ==")
+
     global s
     r = s.post(webAddress+"/api/logout")
     print("\n"+r.text+"\n")
@@ -144,6 +153,8 @@ def Logout(): # GET (No payload being sent)
 
 def List(): # GET (Getting list of module instances)
     '''This is used to view a list of all module instances and the professor(s) teaching each of them'''
+    print("\n\n== List ==")
+
     global s
     r = s.get(webAddress+"/api/list")
     print("\n"+r.text+"\n")
@@ -152,6 +163,8 @@ def List(): # GET (Getting list of module instances)
 
 def View(): # GET (Getting list of professor ratings)
     ''' This command is used to view the rating of all professors '''
+    print("\n\n== View ==")
+
     global s
     r = s.get(webAddress+"/api/view")
     print("\n"+r.text+"\n")
@@ -160,6 +173,8 @@ def View(): # GET (Getting list of professor ratings)
 
 def Average():
     ''' This command is used to view the average rating of a certain professor in a certain module'''
+    print("\n\n== Average ==")
+
     payload = { "professorID": command[1],
                 "moduleCode": command[2]}
 
@@ -173,6 +188,8 @@ def Average():
 
 def Rate(): # POST
     '''This is used to rate the teaching of a certain professor in a certain module instance'''
+    print("\n\n== Rate ==")
+
     payload = { "professorID":  command[1],
                 "moduleCode":   command[2],
                 "year":         command[3],
