@@ -110,7 +110,7 @@ def apiLogin(request): # POST
         if len(Student.objects.filter(username__exact=username).filter(password__exact=password)):
             request.session['loggedIn'] = True
             request.session['username'] = username
-            return HttpResponse("Login successful!")
+            return HttpResponse(username)
         else:
             return HttpResponse("The user name or password is incorrect.")
 
@@ -244,7 +244,7 @@ def apiAverage(request):
 
         # No instances could be found for a given module
         if not len(instanceList):
-            return HttpResponse(professor[0]+" was shown not to teach any instances "+module[0]+".")
+            return HttpResponse(profNameFormat+" was shown not to teach any instances "+module[0].title+" ("+module[0].code+")")
 
         # Calculate averages
         ratingCount = 0
@@ -306,9 +306,17 @@ def apiRate(request):
             return HttpResponse("Module instance not found.")
 
 
+        # Check if professor ID exists
+        professorID = request.POST["professorID"] # professor_id is the unique id of a professor, and
+        professor   = Professor.objects.filter(professorID__exact=professorID)
+        if not len(professor):
+            return HttpResponse("No professor was found to have the specified ID.")
+
+        # Format of name for printing
+        profNameFormat = "Professor " + professor[0].forename[0] + ". " + professor[0].surname + " ("+professor[0].professorID+")"
+
         # professor_id is the UID (unique id) of a professor, e.g. JE1
         # Verify the UID for a professor is present in the given instance
-        professorID = request.POST["professorID"]
         professor = 0
         for item in query[0].professor.all():
             if professorID == item.professorID:
@@ -316,7 +324,7 @@ def apiRate(request):
                 break 
 
         if not professor: # If no professor found
-            return HttpResponse("This module instance is not taught by the specified professor.")
+            return HttpResponse("This module instance is not taught by "+profNameFormat)
 
         instance = query[0]
         username = request.session["username"]
@@ -327,11 +335,11 @@ def apiRate(request):
         if len(query):
             # Check if the new rating is different to the old one
             if query[0].rating == rating:
-                response = "You have already rated "+query[0].professor.professorID+" "+str(rating)+" Stars for this instance."
+                response = "You have already rated "+profNameFormat+" "+str(rating)+" Stars for this instance."
                 return HttpResponse(response)
 
             # Update the students rating
-            response = "Rating updated from "+str(query[0].rating)+" to "+str(rating)+" Stars."
+            response = "Your rating for "+profNameFormat+" has been updated from "+str(query[0].rating)+" to "+str(rating)+" Stars."
             query[0].rating = rating
             query[0].save()
             return HttpResponse(response)
@@ -345,7 +353,7 @@ def apiRate(request):
 
         p1.save()
 
-        return HttpResponse("Rating set successfully")
+        return HttpResponse("You have rated "+profNameFormat+" "+str(rating)+" Stars for this instance.")
 
     except Exception as e:
         if debugMode:

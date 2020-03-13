@@ -4,17 +4,19 @@ s = requests.Session()  # Create session in which all requests will take place
 webAddress = "http://127.0.0.1:8000" # Address of my site / webAPI (not hard-coded for the sake of local testing)
 supportedURLs = ["sc17jhd.pythonanywhere.com","http://127.0.0.1:8000", "127.0.0.1:8000"]
 command = []
-mainLoop = 1    # Used to keep the main loop running until the program terminates
-wrongArg = 0    # Used in handling which error messages are displayed to the user 
+mainLoop = 1     # Used to keep the main loop running until the program terminates
+wrongArg = 0     # Used in handling which error messages are displayed to the user 
+sessionName = "" # Name of the client which is currently logged in
 
 def main():
-    global mainLoop, command, wrongArg
+    global mainLoop, command, wrongArg, sessionName
 
     while mainLoop:
         wrongArg = 0
 
         # Get user input - strip it of trailing spaces - split it into it's components
-        command = input("Please enter a command: ").strip().split(" ")
+        command = input(sessionName+"Please enter a command: ").strip().split(" ")
+        
 
         if command[0] == "register" and ArgumentsSupplied(1):
             Register()
@@ -61,7 +63,7 @@ def ArgumentsSupplied(requiredArguments):
 def Help():
     ''' Present a list of available commands to the user'''
 
-    print("\n== Help ==\n")
+    print("\n\n== Help ==")
 
     print("Register to the service.\n    register")
     print("Login to the service.\n    login sc17jhd.pythonanywhere.com")
@@ -114,9 +116,10 @@ def Register(): # POST (sending account details)
 
 def Login(): # POST (sending login details)
     '''This command is used to log in to the service.'''
+    global sessionName
 
     if (command[1] in supportedURLs):
-        print("\n== Login ==\n")
+        print("\n\n== Login ==")
         print("Attempting to login to: " + command[1])
         username = input("Please enter your username: ")
         password = input("Please enter your password: ")
@@ -126,7 +129,13 @@ def Login(): # POST (sending login details)
         try:
             global s
             r = s.post(webAddress + "/api/login", data=payload)
-            print("\n"+r.text+"\n")
+            if r.text==username:
+                sessionName = "("+username+") "
+                print("\nLogin successful!\n")
+            else:
+                print("\n"+r.text+"\n")
+
+
         except Exception as e:
             serviceReachError()
     else:
@@ -143,63 +152,83 @@ def serviceReachError():
 
 def Logout(): # GET (No payload being sent)
     ''' This causes the user to logout from the current session '''
+    global s, sessionName
     print("\n\n== Logout ==")
 
-    global s
-    r = s.post(webAddress+"/api/logout")
-    print("\n"+r.text+"\n")
+    try:
+        sessionName = ""
+        r = s.post(webAddress+"/api/logout")
+        print(r.text+"\n")
+
+    except Exception as e:
+        serviceReachError()
+
+
 
 
 
 def List(): # GET (Getting list of module instances)
     '''This is used to view a list of all module instances and the professor(s) teaching each of them'''
+    global s
     print("\n\n== List ==")
 
-    global s
-    r = s.get(webAddress+"/api/list")
-    print("\n"+r.text+"\n")
+    try:
+        r = s.get(webAddress+"/api/list")
+        print(r.text+"\n")
 
+    except Exception as e:
+        serviceReachError()
 
 
 def View(): # GET (Getting list of professor ratings)
     ''' This command is used to view the rating of all professors '''
+    global s
     print("\n\n== View ==")
 
-    global s
-    r = s.get(webAddress+"/api/view")
-    print("\n"+r.text+"\n")
+    try:
+        r = s.get(webAddress+"/api/view")
+        print(r.text+"\n")
+    
+    except Exception as e:
+        serviceReachError()
 
 
 
 def Average():
     ''' This command is used to view the average rating of a certain professor in a certain module'''
+    global s
     print("\n\n== Average ==")
 
-    payload = { "professorID": command[1],
-                "moduleCode": command[2]}
+    try:
+        payload = { "professorID": command[1],
+                    "moduleCode": command[2]}
 
-    global s
-    r = s.post(webAddress+"/api/average", data=payload)
-    print("\n"+r.text+"\n")
+        r = s.post(webAddress+"/api/average", data=payload)
+        print(r.text+"\n")
 
-    
+    except Exception as e:
+        serviceReachError()
+
 
 
 
 def Rate(): # POST
     '''This is used to rate the teaching of a certain professor in a certain module instance'''
+    global s
     print("\n\n== Rate ==")
 
-    payload = { "professorID":  command[1],
-                "moduleCode":   command[2],
-                "year":         command[3],
-                "semester":     command[4],
-                "rating":       command[5]}
+    try:
+        payload = { "professorID":  command[1],
+                    "moduleCode":   command[2],
+                    "year":         command[3],
+                    "semester":     command[4],
+                    "rating":       command[5]}
 
-    global s
-    r = s.post(webAddress+"/api/rate", data=payload)
-    print("\n"+r.text+"\n")
+        r = s.post(webAddress+"/api/rate", data=payload)
+        print(r.text+"\n")
 
+    except Exception as e:
+        serviceReachError()
 
 
 
