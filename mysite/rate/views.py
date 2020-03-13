@@ -112,7 +112,7 @@ def apiLogin(request): # POST
             request.session['username'] = username
             return HttpResponse(username)
         else:
-            return HttpResponse("The user name or password is incorrect.")
+            return HttpResponse("The username or password is incorrect.")
 
     except Exception as e:
         if debugMode:
