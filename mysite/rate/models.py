@@ -12,26 +12,26 @@ class Student(models.Model):
     Users can only rate professors when they are logged in to the service. 
     '''
 
-    username = models.CharField(max_length=30)
+    username = models.CharField(max_length=30, unique=True)
     password = models.CharField(max_length=30)
     email = models.EmailField(max_length=50)
 
-    def clean(self, *args, **kwargs): # Validation to prevent duplicate module instances
-        # Error check to prevent duplicate users from being entered via admin
-        query = []
-        try:
-            # Check if identical user instance already exists (Shares same username)
-            query = Student.objects.filter(username__exact=self.username)
-        except Exception as e:
-            pass # Exception raised if user hasn't selected a module
+    # def clean(self, *args, **kwargs): # Validation to prevent duplicate module instances
+    #     # Error check to prevent duplicate users from being entered via admin
+    #     query = []
+    #     try:
+    #         # Check if identical user instance already exists (Shares same username)
+    #         query = Student.objects.filter(username__exact=self.username)
+    #     except Exception as e:
+    #         pass # Exception raised if user hasn't selected a module
 
-        if len(query): # Raise error
-            # Dont allow duplicate users/ Remove previous instance if it already exists
-            query[0].delete()
-            print("removing dupe")
+    #     if len(query): # Raise error
+    #         # Dont allow duplicate users/ Remove previous instance if it already exists
+    #         query[0].delete()
+    #         print("removing dupe")
 
 
-        super(Student, self).clean(*args, **kwargs)
+    #     super(Student, self).clean(*args, **kwargs)
 
 
     def __str__(self):
@@ -52,10 +52,18 @@ class Professor(models.Model):
     def save(self, *args, **kwargs): # Generate Unique ID based on forename and surname
         uid = str(self.forename)[0] + str(self.surname)[0]  # Unique ID
 
-        # Check for users with matching ID start
-        uidSet = Professor.objects.filter(professorID__contains=uid)
-        uidLen = len(uidSet)
-        uid += str(uidLen)
+        uidFound = 0
+        uidIndex = 0
+        
+        # Find first available UID index
+        while not uidFound:
+            uidSet = Professor.objects.filter(professorID__exact=uid+str(uidIndex))
+            
+            if not len(uidSet):
+                uidFound =1
+                uid+=str(uidIndex)
+            else:
+                uidIndex+=1
 
         self.professorID = uid
         super(Professor, self).save(*args, **kwargs)

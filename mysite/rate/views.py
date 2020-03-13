@@ -8,7 +8,7 @@ from functools import wraps
 
 import re
 
-debugMode = 1
+debugMode = 0
 
 
 
