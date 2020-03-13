@@ -2,7 +2,7 @@ import requests
 
 s = requests.Session()  # Create session in which all requests will take place
 webAddress = "http://127.0.0.1:8000" # Address of my site / webAPI (not hard-coded for the sake of local testing)
-supportedURLs = ["http://127.0.0.1:8000", "sc17jhd.pythonanywhere.com"]
+supportedURLs = ["sc17jhd.pythonanywhere.com","http://127.0.0.1:8000", "127.0.0.1:8000"]
 command = []
 mainLoop = 1    # used to keep the main loop running until the program terminates
 
@@ -95,7 +95,7 @@ def Register(): # POST (sending account details)
                 "password": password,
                 "email": email }
     global s
-    r = s.get(webAddress + "/api/register", params=payload)
+    r = s.get(webAddress + "/api/register", data=payload)
     
     if "\n"+r.text+"\n" == "":
         print("User registered successfully!")
@@ -118,19 +118,19 @@ def Login(): # POST (sending login details)
 
         try:
             global s
-            r = s.post(command[1] + "/api/login", params=payload)
+            r = s.post(command[1] + "/api/login", data=payload)
             print("\n"+r.text+"\n")
         except Exception as e:
             serviceReachError()
     else:
-        print("Sorry, the URL you have entered is either unsupported or invalid.")
-        print("Consider using the following URL and try again: "+supportedURLs[1])
+        print("\nSorry, the URL you have entered is either unsupported or invalid.")
+        print("Consider using the following URL and try again: "+supportedURLs[0]+"\n")
 
 
 
 def serviceReachError():
-    print("Sorry, the service you are trying to reach could not be accessed at this time.")
-    print("The service may be down, or you may be missing required modules.")
+    print("\nSorry, the service you are trying to reach could not be accessed at this time.")
+    print("The service may be down, or you may be missing required modules.\n")
 
 
 
@@ -186,5 +186,15 @@ def Rate(): # POST
 
 
 
-print("=== Ratings Client Application ===\n")
-main() # Run Main Loop
+# print("=== Ratings Client Application ===\n")
+# main() # Run Main Loop
+
+
+
+
+
+# payload = { "username": "username",
+#         "password": "password"}
+
+
+

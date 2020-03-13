@@ -93,8 +93,10 @@ def apiRegister(request): # POST
 def apiLogin(request): # POST
     ''' This command is used to log in to the service.'''
 
+    print("\n\n\nMEMEM")
     username = request.POST["username"]
     password = request.POST["password"]
+    print("\n\n\nMEMEM")
 
     if len(Student.objects.filter(username__exact=username).filter(password__exact=password)):
         request.session['loggedIn'] = True
